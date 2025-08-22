@@ -110,7 +110,7 @@ export function Dashboard() {
                         <p className="text-sm text-zinc-400">Pago em</p>
                         <p className="text-white font-medium">{formatDate(payment.date)}</p>
                       </div>
-                      <div className="hidden md:block flex flex-col items-end">
+                      <div className="hidden md:flex flex-col items-end">
                         <p className="text-sm text-zinc-400">Valor pago</p>
                         <p className="text-green-500 font-medium">
                           {formatCurrency(payment.amount)}
