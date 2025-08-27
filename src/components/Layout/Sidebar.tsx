@@ -2,9 +2,20 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/store/authStore'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Settings, LogOut } from 'lucide-react'
-import { sidebarItems } from '@/infra/sidebarItems'
-import { paths } from '@/infra/paths'
+import { LayoutDashboard, CreditCard, Settings, LogOut } from 'lucide-react'
+
+const sidebarItems = [
+  {
+    name: 'Dashboard',
+    icon: LayoutDashboard,
+    path: '/dashboard',
+  },
+  {
+    name: 'Dívidas',
+    icon: CreditCard,
+    path: '/debts',
+  },
+]
 
 export function Sidebar() {
   const location = useLocation()
@@ -13,19 +24,23 @@ export function Sidebar() {
 
   const handleLogout = () => {
     logout()
-    navigate(paths.LOGIN)
+    navigate('/login')
   }
+
+  const isRouteActive = (path: string) => location.pathname === path
 
   return (
     <div className="flex h-full w-64 flex-col bg-zinc-900 text-white">
-      <div className="flex items-center justify-center gap-3 p-6 border-b border-zinc-700">
-        <img src="/assets/logo.svg" alt="logo" className="w-24 h-24" />
+      {/* Logo */}
+      <div className="flex items-center justify-center gap-3 p-[1.13rem] border-b border-zinc-700">
+        <img src="/assets/logo.svg" alt="logo" className="w-16 h-16" />
       </div>
 
-      <nav className="flex-1 p-4 pt-6 space-y-2">
+      {/* Navigation */}
+      <nav className="flex-1 p-4 space-y-2">
         {sidebarItems.map((item) => {
           const Icon = item.icon
-          const isActive = location.pathname === item.path
+          const isActive = isRouteActive(item.path)
 
           return (
             <Button
@@ -44,10 +59,15 @@ export function Sidebar() {
         })}
       </nav>
 
+      {/* Footer */}
       <div className="p-4 border-t border-zinc-700 space-y-2">
         <Button
-          variant="ghost"
-          className="w-full justify-start gap-3 text-white hover:bg-zinc-700"
+          variant={isRouteActive('/settings') ? 'secondary' : 'ghost'}
+          className={cn(
+            'w-full justify-start gap-3 text-white hover:bg-zinc-700',
+            isRouteActive('/settings') && 'bg-orange-500 hover:bg-orange-600'
+          )}
+          onClick={() => navigate('/settings')}
         >
           <Settings className="w-4 h-4" />
           Configurações
