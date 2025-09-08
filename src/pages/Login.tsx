@@ -8,6 +8,19 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { LoginSchema, LoginForm } from '@/types'
 import { useAuthStore } from '@/store/authStore'
 import { useNavigate, Link } from 'react-router-dom'
+import { useMutation } from '@tanstack/react-query'
+import { toast } from 'sonner'
+import { AxiosError } from 'axios'
+
+type ResponseError = {
+  response: {
+    data: {
+      message: string,
+      error: string,
+      status: number,
+    }
+  },
+}
 
 export function Login() {
   const [isLoading, setIsLoading] = useState(false)
@@ -22,15 +35,24 @@ export function Login() {
     resolver: zodResolver(LoginSchema),
   })
 
+  const { mutateAsync: mutateLogin, isPending } = useMutation({
+    mutationFn: async (form: LoginForm) => {
+      const ok = await login(form.email, form.password)
+      return ok
+    },
+    onSuccess: () => {
+      navigate('/dashboard')
+    },
+    onError: (err: AxiosError & ResponseError) => {
+      const message = err?.response?.data?.message || 'Falha na autenticação'
+      toast.error(message)
+    },
+  })
+
   const onSubmit = async (data: LoginForm) => {
     setIsLoading(true)
     try {
-      const success = await login(data.email, data.password)
-      if (success) {
-        navigate('/dashboard')
-      }
-    } catch (error) {
-      console.error('Login failed:', error)
+      await mutateLogin(data)
     } finally {
       setIsLoading(false)
     }
@@ -86,9 +108,9 @@ export function Login() {
               <Button
                 type="submit"
                 className="w-full bg-orange-500 hover:bg-orange-600 text-white"
-                disabled={isLoading}
+                disabled={isLoading || isPending}
               >
-                {isLoading ? 'Carregando...' : 'ENTRAR'}
+                {isLoading || isPending ? 'Carregando...' : 'ENTRAR'}
               </Button>
             </form>
 
