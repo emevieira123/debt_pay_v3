@@ -3,34 +3,19 @@ import { DashboardLayout } from '@/components/Layout/DashboardLayout'
 import { MetricCard } from '@/components/Dashboard/MetricCard'
 import { PaymentChart } from '@/components/Dashboard/PaymentChart'
 import { useDebtStore } from '@/store/debtStore'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useGetMetrics } from '@/hooks/useGetMetrics'
+import { formatCurrency } from '@/utils/formatCurrency'
+import { LatestPayments } from '@/components/Dashboard/LatestPayments'
 
 export function Dashboard() {
-  const { debts, payments, initializeData } = useDebtStore()
+  const { debts, initializeData } = useDebtStore()
+  const { data: metrics, isLoading } = useGetMetrics();
 
   useEffect(() => {
     if (debts.length === 0) {
       initializeData()
     }
   }, [debts.length, initializeData])
-
-  const totalDebt = debts.reduce((sum, debt) => sum + debt.totalAmount, 0)
-  const totalPaid = debts.reduce((sum, debt) => sum + debt.paidAmount, 0)
-  const totalRemaining = totalDebt - totalPaid
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(value)
-  }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR')
-  }
-
-  // Pegar os últimos 7 pagamentos
-  const recentPayments = payments.slice(0, 7)
 
   return (
     <DashboardLayout
@@ -42,15 +27,18 @@ export function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <MetricCard
             title="Total em Dívidas"
-            value={formatCurrency(totalDebt)}
+            value={formatCurrency(metrics?.valorTotalDividas as number)}
+            isLoading={isLoading}
           />
           <MetricCard
             title="Já Pago"
-            value={formatCurrency(totalPaid)}
+            value={formatCurrency(metrics?.valorTotalPago as number)}
+            isLoading={isLoading}
           />
           <MetricCard
             title="Restante a Pagar"
-            value={formatCurrency(totalRemaining)}
+            value={formatCurrency(metrics?.valorTotalEmDebito as number)}
+            isLoading={isLoading}
           />
         </div>
 
@@ -61,67 +49,7 @@ export function Dashboard() {
             <PaymentChart />
           </div>
 
-          <Card className="bg-zinc-900 border-zinc-700">
-            <CardHeader>
-              <CardTitle className="text-white">Últimos pagamentos</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {recentPayments.map((payment) => {
-                  const debt = debts.find(d => d.id === payment.debtId)
-                  return (
-                    <div key={payment.id} className="grid grid-cols-2 md:grid-cols-[1fr_1fr_1fr_0.2fr] gap-4 items-center p-3 bg-zinc-800 rounded-lg">
-                      {/* Mobile: Primeira coluna - Credor e Produto */}
-                      <div className="md:hidden">
-                        <div className="mb-2">
-                          <p className="text-sm text-zinc-400">Credor</p>
-                          <p className="text-white font-medium">{debt?.name.slice(0, 20) + '...' || '-'}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-zinc-400">Produto</p>
-                          <p className="text-white font-medium">{debt?.name.slice(0, 20) + '...' || '-'}</p>
-                        </div>
-                      </div>
-
-                      {/* Mobile: Segunda coluna - Valor pago e Data */}
-                      <div className="md:hidden flex flex-col items-end">
-                        <div className="mb-2">
-                          <p className="text-sm text-zinc-400">Valor pago</p>
-                          <p className="text-green-500 font-medium">
-                            {formatCurrency(payment.amount)}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-zinc-400">Pago em</p>
-                          <p className="text-white font-medium">{formatDate(payment.date)}</p>
-                        </div>
-                      </div>
-
-                      {/* Desktop: Layout original */}
-                      <div className="hidden md:block">
-                        <p className="text-sm text-zinc-400">Credor</p>
-                        <p className="text-white font-medium">{debt?.name.slice(0, 16) + '...' || '-'}</p>
-                      </div>
-                      <div className="hidden md:block">
-                        <p className="text-sm text-zinc-400">Produto</p>
-                        <p className="text-white font-medium">{debt?.name.slice(0, 16) + '...' || '-'}</p>
-                      </div>
-                      <div className="hidden md:block">
-                        <p className="text-sm text-zinc-400">Pago em</p>
-                        <p className="text-white font-medium">{formatDate(payment.date)}</p>
-                      </div>
-                      <div className="hidden md:flex flex-col items-end">
-                        <p className="text-sm text-zinc-400">Valor pago</p>
-                        <p className="text-green-500 font-medium">
-                          {formatCurrency(payment.amount)}
-                        </p>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </CardContent>
-          </Card>
+          <LatestPayments />
         </div>
       </div>
     </DashboardLayout>
