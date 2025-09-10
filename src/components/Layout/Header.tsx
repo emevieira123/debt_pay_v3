@@ -1,6 +1,7 @@
 import { useAuthStore } from '@/store/authStore'
-import { Bell, Menu, User } from 'lucide-react'
+import { Bell, Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 
 interface HeaderProps {
   title: string
@@ -14,9 +15,9 @@ export function Header({ title, description, onMenuClick }: HeaderProps) {
   return (
     <header className="flex items-center justify-between p-6 border-b border-zinc-800 shrink-0">
       <div className="flex items-center gap-4">
-        <Button 
-          variant="ghost" 
-          size="icon" 
+        <Button
+          variant="ghost"
+          size="icon"
           className="text-white md:hidden"
           onClick={onMenuClick}
         >
@@ -32,9 +33,13 @@ export function Header({ title, description, onMenuClick }: HeaderProps) {
           <Bell className="w-5 h-5" />
         </Button>
         <div className="hidden sm:flex items-center gap-2 text-white">
-          <div className="w-8 h-8 bg-zinc-700 rounded-full flex items-center justify-center">
+          {/* <div className="w-8 h-8 bg-zinc-700 rounded-full flex items-center justify-center">
             <User className="w-4 h-4" />
-          </div>
+          </div> */}
+          <Avatar>
+            <AvatarImage src={`https://github.com/${user?.usuarioGithub}.png`} />
+            <AvatarFallback>CN</AvatarFallback>
+          </Avatar>
           <span className="hidden lg:inline">{user?.name}</span>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
@@ -10,6 +10,7 @@ import { useAuthStore } from '@/store/authStore'
 import { useNavigate, Link } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { Eye, EyeOff } from 'lucide-react'
 import { AxiosError } from 'axios'
 
 type ResponseError = {
@@ -24,8 +25,16 @@ type ResponseError = {
 
 export function Login() {
   const [isLoading, setIsLoading] = useState(false)
-  const { login } = useAuthStore()
+  const { login, isAuthenticated } = useAuthStore()
   const navigate = useNavigate()
+  const [showPassword, setShowPassword] = useState(false)
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard')
+    }
+  }, [isAuthenticated, navigate])
 
   const {
     register,
@@ -64,7 +73,7 @@ export function Login() {
         <Card className="bg-zinc-900 border-zinc-700">
           <CardHeader className="space-y-1">
             <div className="flex items-center justify-center gap-3 mb-8">
-              <img src="/assets/logo.svg" alt="logo" className="w-32 h-32" />
+              <img src="/assets/logo.svg" alt="logo" className="w-24 h-24" />
             </div>
             <h2 className="text-xl font-semibold text-white">LOGIN</h2>
             <p className="text-sm text-zinc-400">
@@ -81,7 +90,7 @@ export function Login() {
                   id="email"
                   type="email"
                   placeholder="Informe seu e-mail"
-                  className="bg-zinc-800 border-zinc-600 text-white placeholder:text-zinc-400"
+                  className="bg-zinc-800 border-zinc-600 text-white placeholder:text-zinc-400 h-12"
                   {...register('email')}
                 />
                 {errors.email && (
@@ -93,13 +102,23 @@ export function Login() {
                 <Label htmlFor="password" className="text-white">
                   Senha
                 </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Informe sua senha"
-                  className="bg-zinc-800 border-zinc-600 text-white placeholder:text-zinc-400"
-                  {...register('password')}
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Informe sua senha"
+                    className="bg-zinc-800 border-zinc-600 text-white placeholder:text-zinc-400 pr-10 h-12"
+                    {...register('password')}
+                  />
+                  <button
+                    type="button"
+                    aria-label={showPassword ? 'Esconder senha' : 'Mostrar senha'}
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute inset-y-0 right-2 flex items-center text-zinc-400 hover:text-zinc-200"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
                 {errors.password && (
                   <p className="text-sm text-red-500">{errors.password.message}</p>
                 )}
@@ -107,10 +126,10 @@ export function Login() {
 
               <Button
                 type="submit"
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white h-12"
                 disabled={isLoading || isPending}
               >
-                {isLoading || isPending ? 'Carregando...' : 'ENTRAR'}
+                {isLoading || isPending ? 'ENTRANDO...' : 'ENTRAR'}
               </Button>
             </form>
 

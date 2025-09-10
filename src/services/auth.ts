@@ -7,6 +7,8 @@ export type LoginRequest = {
 
 export type LoginResponse = {
   access_token: string;
+  nome: string;
+  usuarioGithub: string;
 };
 
 export async function loginService(
@@ -14,4 +16,15 @@ export async function loginService(
 ): Promise<LoginResponse> {
   const response = await api.post<LoginResponse>("/login", payload);
   return response.data;
+}
+
+export type RegisterRequest = {
+  email: string;
+  senha: string;
+  nome: string;
+  usuarioGithub?: string;
+};
+
+export async function registerService(payload: RegisterRequest): Promise<void> {
+  await api.post("/usuarios", payload);
 }

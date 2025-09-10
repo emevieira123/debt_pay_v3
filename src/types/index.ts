@@ -1,13 +1,22 @@
 import { z } from "zod";
 
-export const RegisterSchema = z.object({
-  name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
-  email: z.string().email("E-mail inválido"),
-  password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
-});
+export const RegisterSchema = z
+  .object({
+    name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
+    email: z.email("E-mail inválido"),
+    password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
+    confirmPassword: z
+      .string()
+      .min(6, "Confirmação deve ter pelo menos 6 caracteres"),
+    usuarioGithub: z.string().optional(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "As senhas não coincidem.",
+    path: ["confirmPassword"],
+  });
 
 export const LoginSchema = z.object({
-  email: z.string().email("E-mail inválido"),
+  email: z.email("E-mail inválido"),
   password: z.string().min(1, "Senha é obrigatória"),
 });
 
@@ -35,7 +44,7 @@ export const ProfileSchema = z.object({
   name: z
     .string()
     .min(2, { message: "Nome deve ter pelo menos 2 caracteres." }),
-  email: z.string().email({ message: "Por favor, insira um e-mail válido." }),
+  email: z.email({ message: "Por favor, insira um e-mail válido." }),
 });
 
 export const PasswordSchema = z
@@ -56,6 +65,7 @@ export type User = {
   id: string;
   name: string;
   email: string;
+  usuarioGithub: string;
 };
 
 export type Debt = z.infer<typeof DebtSchema>;

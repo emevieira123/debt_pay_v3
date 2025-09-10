@@ -7,7 +7,9 @@ const api = axios.create({
 
 // Attach persisted token on startup
 const persistedToken =
-  typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
+  typeof window !== "undefined"
+    ? localStorage.getItem("debt_pay_auth_token")
+    : null;
 if (persistedToken) {
   api.defaults.headers.common["Authorization"] = `Bearer ${persistedToken}`;
 }
